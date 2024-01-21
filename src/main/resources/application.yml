@@ -6,4 +6,4 @@ spring:
     name: ms-product-order-mgmt
   profiles:
     active:
-    - dev
+      - ${ENVIRONMENT}
