@@ -3,17 +3,17 @@ version: "3"
 services:
   api:
     build: ..
-    image: product-order-mgmt:latest
-    container_name: product-order-mgmt
+    image: product-order:latest
+    container_name: product-order
     ports:
       - "9090:9090"
     networks:
       - frontend
       - backend
     environment:
-      - "DATABASE_HOST=product-order-mgmt-db"
+      - "DATABASE_HOST=product-order-db"
       - "DATABASE_PORT=5432"
-      - "DATABASE_NAME=product-order-mgmt"
+      - "DATABASE_NAME=product-order"
       - "DATABASE_USER=postgres"
       - "DATABASE_PASSWORD=1023040"
       - "ENVIRONMENT=prod"
@@ -21,7 +21,7 @@ services:
 
   db:
     image: postgres
-    container_name: product-order-mgmt-db
+    container_name: product-order-db
     networks:
       - backend
     environment:
@@ -29,7 +29,7 @@ services:
       - "POSTGRES_PASSWORD=1023040"
       - "POSTGRES_DB=product-mgmt"
     volumes:
-      - /volume/product-order-mgmt/postgres:/var/lib/postgresql/data
+      - /volume/product-order/postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     restart: always

@@ -11,12 +11,12 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.barbosa.ms.productordermgmt</groupId>
-    <artifactId>product-order-mgmt</artifactId>
+    <groupId>com.barbosa.ms.invetorymgmt</groupId>
+    <artifactId>product-order</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>product-order-mgmt</name>
+    <name>product-order</name>
 
     <properties>
         <java.version>17</java.version>
