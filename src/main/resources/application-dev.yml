@@ -15,7 +15,7 @@ spring:
             hibernate:
                 format-sql: true
     flyway: 
-      enabled: true
+      enabled: false
 
 springdoc:
   api-docs:
