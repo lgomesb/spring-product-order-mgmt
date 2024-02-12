@@ -15,26 +15,32 @@ import java.util.UUID;
 @Service
 public class ProductOrderServiceImpl implements ProductOrderService {
 
+    private final ProductOrderRepository repository;
+
     @Autowired
-    private ProductOrderRepository repository;
+    public ProductOrderServiceImpl(ProductOrderRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public ProductOrderRecord create(ProductOrderRecord recordObject) {
-        ProductOrder productorder = repository.save(new ProductOrder(recordObject.name()) );
-        return new ProductOrderRecord(productorder.getId(), productorder.getName());
+        ProductOrder productorder = repository.save(ProductOrder.builder()
+                .status("open")
+                .build());
+        return new ProductOrderRecord(productorder.getId(), productorder.getStatus());
     }
 
     @Override
     public ProductOrderRecord findById(UUID id) {
         ProductOrder productorder = this.getProductOrderById(id);
-        return new ProductOrderRecord(productorder.getId(), productorder.getName());
+        return new ProductOrderRecord(productorder.getId(), productorder.getStatus());
     }
 
     
     @Override
     public void update(ProductOrderRecord recordObject) {
         ProductOrder productorder = this.getProductOrderById(recordObject.id());
-        productorder.setName(recordObject.name());
+        productorder.setStatus(recordObject.name());
         productorder.setModifiedOn(LocalDateTime.now());
         productorder.setModifiedBy("99999");
         repository.save(productorder);
@@ -58,7 +64,7 @@ public class ProductOrderServiceImpl implements ProductOrderService {
             .stream()
             .map(entity -> ProductOrderRecord.builder()
                     .id(entity.getId())
-                    .name(entity.getName())
+                    .name(entity.getStatus())
                     .build())
             .toList();
     }
