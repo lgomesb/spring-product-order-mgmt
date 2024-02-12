@@ -95,12 +95,12 @@ class ProductOrderServiceSucceedTest {
         void productorderInicietedForSuccessfulReturn() {
            productorder = ProductOrder.builder()
                         .id(creationIdOfProductOrder())
-                        .name("ProductOrder-Test-Success")
+                        .status("ProductOrder-Test-Success")
                         .build();
         }
 
         void productorderRecordInicietedForSuccessfulReturn () {
-            productorderRecord = new ProductOrderRecord(productorder.getId(), productorder.getName());
+            productorderRecord = new ProductOrderRecord(productorder.getId(), productorder.getStatus());
         }
     }
 
@@ -149,7 +149,7 @@ class ProductOrderServiceSucceedTest {
         void shouldBeSuccessfulValidationRules(ProductOrderRecord record) {
             assertNotNull(record);
             assertNotNull(record.name());
-            assertEquals(record.name(), productorder.getName());
+            assertEquals(record.name(), productorder.getStatus());
             assertNotNull(record.id());
             assertEquals(record.id(), productorder.getId());
         }
@@ -158,14 +158,14 @@ class ProductOrderServiceSucceedTest {
             ArgumentCaptor<ProductOrder> productorderCaptor = ArgumentCaptor.forClass(ProductOrder.class);
             verify(repository).delete(productorderCaptor.capture());
             assertNotNull(productorderCaptor.getValue());
-            assertEquals(productorderCaptor.getValue().getName(),productorder.getName());
+            assertEquals(productorderCaptor.getValue().getStatus(),productorder.getStatus());
         }
 
         void shouldBeSuccessfulArgumentValidationByUpdate() {
             ArgumentCaptor<ProductOrder> productorderCaptor = ArgumentCaptor.forClass(ProductOrder.class);
             verify(repository).save(productorderCaptor.capture());
             assertNotNull(productorderCaptor.getValue());
-            assertEquals(productorderCaptor.getValue().getName(),productorder.getName());
+            assertEquals(productorderCaptor.getValue().getStatus(),productorder.getStatus());
         }
 
         void shouldBeSuccessfulArgumentValidationByListAll(List<ProductOrderRecord> productorderRecords) {

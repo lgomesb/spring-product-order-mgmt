@@ -3,9 +3,15 @@ package com.barbosa.ms.invetorymgmt.productorder.repositories.success;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import java.util.Optional;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
 import java.util.stream.Stream;
 
+import com.barbosa.ms.invetorymgmt.productorder.domain.entities.OrderItem;
+import com.barbosa.ms.invetorymgmt.productorder.repositories.OrderItemRepository;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -31,12 +37,12 @@ import com.barbosa.ms.invetorymgmt.productorder.repositories.ProductOrderReposit
 class ProductOrderRepositorySuccessTest {
 
     @Autowired
-    private ProductOrderRepository repository;
+    private ProductOrderRepository orderRepository;
 
-    private static Stream<Arguments> provideProductOrderData() {        
+    private static Stream<Arguments> provideProductOrderData() {
         return Stream.of(
-          Arguments.of("ProductOrder-Test-01"),
-          Arguments.of("ProductOrder-Test-02")
+          Arguments.of("A"),
+          Arguments.of("I")
         );
     }
 
@@ -44,53 +50,69 @@ class ProductOrderRepositorySuccessTest {
     @Test 
     @Order(0)
     void shouldSuccessfulInjectComponent() {
-        assertNotNull(repository);
+        assertNotNull(orderRepository);
     }
 
     @Order(1)
     @ParameterizedTest
     @MethodSource("provideProductOrderData")
-    void shouldWhenCallCreate(String productorderName) {
-        ProductOrder productorder = repository.saveAndFlush(new ProductOrder(productorderName));
+    void shouldWhenCallCreate(String status) {
+
+        ProductOrder productorder = ProductOrder
+                .builder()
+                .status(status)
+                .build();
+        Set<OrderItem> items = Collections.singleton(OrderItem
+                .builder()
+                .quantity(1)
+                .productOrder(productorder)
+                .productId(UUID.randomUUID())
+                .build());
+
+        productorder.setItems(items);
+        orderRepository.saveAndFlush(productorder);
+
         assertNotNull(productorder, "Should return ProductOrder is not null");
         assertNotNull(productorder.getId());
-        assertEquals(productorderName, productorder.getName());        
+        assertEquals(status, productorder.getStatus());
+        System.out.println(productorder);
+
     }
 
 
     @Order(2)
     @ParameterizedTest
     @MethodSource("provideProductOrderData")
-    void shouldWhenCallFindById(String productorderName) {
-        ProductOrder productorder = repository.save(new ProductOrder(productorderName));
-        Optional<ProductOrder> oProductOrder = repository.findById(productorder.getId());
+    void shouldWhenCallFindById(String status) {
+        ProductOrder productorder = orderRepository.save(ProductOrder.builder().status(status).build());
+        Optional<ProductOrder> oProductOrder = orderRepository.findById(productorder.getId());
         assertNotNull(oProductOrder.get(), "Should return ProductOrder is not null");
         assertNotNull(oProductOrder.get().getId(), "Should return ProductOrder ID is not null");
-        assertNotNull(oProductOrder.get().getName(), "Should return ProductOrder NAME is not null");
+        assertNotNull(oProductOrder.get().getStatus(), "Should return ProductOrder NAME is not null");
     }
 
   
     @Order(3)
     @ParameterizedTest
     @MethodSource("provideProductOrderData")
-    void shouldWhenCallUpdate(String productorderName) {
-        String productorderNameUpdate = "Test-Update-ProductOrder";
-        ProductOrder productorder = repository.save(new ProductOrder(productorderName));
-        Optional<ProductOrder> oProductOrder = repository.findById(productorder.getId());
+    void shouldWhenCallUpdate(String status) {
+        String statusUpdate = "I".equalsIgnoreCase(status)?"A":"I";
+        ProductOrder productorder = orderRepository.save(ProductOrder.builder().status(status).build());
+        Optional<ProductOrder> oProductOrder = orderRepository.findById(productorder.getId());
         ProductOrder newProductOrder = oProductOrder.get();
-        newProductOrder.setName(productorderNameUpdate);
-        newProductOrder = repository.save(newProductOrder);
-        assertEquals(productorderNameUpdate, newProductOrder.getName());
+        newProductOrder.setStatus(statusUpdate);
+        newProductOrder = orderRepository.save(newProductOrder);
+        assertEquals(statusUpdate, newProductOrder.getStatus());
     }
   
     @Order(4)
     @ParameterizedTest
     @MethodSource("provideProductOrderData")
-    void shouldWhenCallDelete(String productorderName) {
-        ProductOrder productorder = repository.save(new ProductOrder(productorderName));
-        Optional<ProductOrder> oProductOrder = repository.findById(productorder.getId());
-        repository.delete(oProductOrder.get());
-        Optional<ProductOrder> findProductOrder = repository.findById(oProductOrder.get().getId());
+    void shouldWhenCallDelete(String status) {
+        ProductOrder productorder = orderRepository.save(ProductOrder.builder().status(status).build());
+        Optional<ProductOrder> oProductOrder = orderRepository.findById(productorder.getId());
+        orderRepository.delete(oProductOrder.get());
+        Optional<ProductOrder> findProductOrder = orderRepository.findById(oProductOrder.get().getId());
         assertFalse(findProductOrder.isPresent());
     }
 }

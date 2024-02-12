@@ -91,7 +91,7 @@ class ProductOrderServiceFailedTest {
         void productorderInicietedForFailueReturn() {
            productorder = ProductOrder.builder()
                         .id(creationIdOfProductOrder())
-                        .name(null)
+                        .status(null)
                         .build();
         }
 
