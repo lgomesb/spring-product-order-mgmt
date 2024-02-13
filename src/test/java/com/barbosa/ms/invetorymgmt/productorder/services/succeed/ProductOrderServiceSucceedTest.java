@@ -1,26 +1,27 @@
 package com.barbosa.ms.invetorymgmt.productorder.services.succeed;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.*;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
+import com.barbosa.ms.invetorymgmt.productorder.domain.entities.OrderItem;
 import com.barbosa.ms.invetorymgmt.productorder.domain.entities.ProductOrder;
+import com.barbosa.ms.invetorymgmt.productorder.domain.records.OrderItemRecord;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.ProductOrderRecord;
 import com.barbosa.ms.invetorymgmt.productorder.repositories.ProductOrderRepository;
 import com.barbosa.ms.invetorymgmt.productorder.services.impl.ProductOrderServiceImpl;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 
+@ExtendWith(MockitoExtension.class)
 class ProductOrderServiceSucceedTest {
 
     @InjectMocks
@@ -29,61 +30,62 @@ class ProductOrderServiceSucceedTest {
     @Mock
     private ProductOrderRepository repository;
     
-    private ProductOrder productorder;
-    private ProductOrderRecord productorderRecord;
-    private Given given = new Given();
-    private When when = new When();
-    private Then then = new Then();
+    private ProductOrder productOrder;
+    private Set<OrderItem> items;
 
+    private ProductOrderRecord productOrderRecord;
+    private final Given given = new Given();
+    private final When when = new When();
+    private final Then then = new Then();
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void shouldSuccessWhenCreate() {
-        given.productorderInicietedForSuccessfulReturn();
-        given.productorderRecordInicietedForSuccessfulReturn();
+        given.productOrderInitiatedForSuccessfulReturn();
+        given.productOrderRecordInitiatedForSuccessfulReturn();
         when.saveProductOrderEntity();
-        ProductOrderRecord record = when.callCreateInProductOrderSerivce();
-        then.shouldBeSuccessfulValidationRules(record);
+        ProductOrderRecord record = when.callCreateInProductOrderService();
+        then.shouldBeSuccessGivenCreate()
+                .and()
+                .shouldBeSuccessfulValidationRules(record);
     }
 
     @Test
     void shouldSuccessWhenFindById() {
-        given.productorderInicietedForSuccessfulReturn();
+        given.productOrderInitiatedForSuccessfulReturn();
         when.findProductOrderById();
         ProductOrderRecord record = when.callProductOrderServiceFindById();
-        then.shouldBeSuccessfulValidationRules(record);
+        then.shouldBeSuccessGivenFind()
+                .and()
+                .shouldBeSuccessfulValidationRules(record);
     }
 
     @Test
     void shouldSuccessWhenUpdate() {
-        given.productorderInicietedForSuccessfulReturn();
-        given.productorderRecordInicietedForSuccessfulReturn();
+        given.productOrderInitiatedForSuccessfulReturn();
+        given.productOrderRecordInitiatedForSuccessfulReturn();
         when.findProductOrderById();
         when.callProductOrderServiceFindById();
         when.saveProductOrderEntity();
-        when.callProductOrderSerivceUpdate();
-        then.shouldBeSuccessfulArgumentValidationByUpdate();        
+        when.callProductOrderServiceUpdate();
+        then.shouldBeSuccessfulArgumentValidationByUpdate();
     }
 
     @Test
     void shouldSuccessWhenDelete() {
-        given.productorderInicietedForSuccessfulReturn();
+        given.productOrderInitiatedForSuccessfulReturn();
         when.findProductOrderById();
         when.deleteProductOrderEntity();
-        when.callDelteInProductOrderSerivce();    
-        then.shouldBeSuccessfulArgumentValidationByDelete();    
+        when.callDeleteInProductOrderService();
+        then.shouldBeSuccessfulArgumentValidationByDelete();
     }
 
     @Test
     void shouldSuccessWhenListAll() {
-        given.productorderInicietedForSuccessfulReturn();
+        given.productOrderInitiatedForSuccessfulReturn();
         when.findAllProductOrder();
-        List<ProductOrderRecord>  productorderRecords = when.callListAllInProductOrderService();
-        then.shouldBeSuccessfulArgumentValidationByListAll(productorderRecords);
+        List<ProductOrderRecord>  productOrderRecords = when.callListAllInProductOrderService();
+        then.shouldBeSuccessfulArgumentValidationByListAll(productOrderRecords);
     }
 
     class Given {
@@ -92,15 +94,34 @@ class ProductOrderServiceSucceedTest {
             return UUID.randomUUID();
         }
 
-        void productorderInicietedForSuccessfulReturn() {
-           productorder = ProductOrder.builder()
+        void productOrderInitiatedForSuccessfulReturn() {
+           productOrder = ProductOrder.builder()
                         .id(creationIdOfProductOrder())
-                        .status("ProductOrder-Test-Success")
+                        .status("A")
                         .build();
+            this.orderItemsInitiatedForSuccessfulReturn();
         }
 
-        void productorderRecordInicietedForSuccessfulReturn () {
-            productorderRecord = new ProductOrderRecord(productorder.getId(), productorder.getStatus());
+        void orderItemsInitiatedForSuccessfulReturn() {
+            items = Collections.singleton(new OrderItem(
+                    UUID.randomUUID(),
+                    1,
+                    productOrder
+            ));
+            productOrder.setItems(items);
+        }
+
+        void productOrderRecordInitiatedForSuccessfulReturn() {
+            productOrderRecord = ProductOrderRecord
+                    .builder()
+                    .id(productOrder.getId())
+                    .status(productOrder.getStatus())
+                    .items(items
+                            .stream()
+                            .map(i -> new OrderItemRecord(i.getProductId(), i.getQuantity()))
+                            .collect(Collectors.toSet()))
+                    .build();
+            ;
         }
     }
 
@@ -108,14 +129,14 @@ class ProductOrderServiceSucceedTest {
 
         void saveProductOrderEntity() {
             when(repository.save(any(ProductOrder.class)))
-            .thenReturn(productorder);
+            .thenReturn(productOrder);
         }
 
-        void callProductOrderSerivceUpdate() {
-            service.update(productorderRecord);
+        void callProductOrderServiceUpdate() {
+            service.update(productOrderRecord);
         }
 
-        void callDelteInProductOrderSerivce() {
+        void callDeleteInProductOrderService() {
             service.delete(given.creationIdOfProductOrder());
         }
 
@@ -128,15 +149,15 @@ class ProductOrderServiceSucceedTest {
         }
 
         void findProductOrderById() {
-            when(repository.findById(any(UUID.class))).thenReturn(Optional.of(productorder));
+            when(repository.findById(any(UUID.class))).thenReturn(Optional.of(productOrder));
         }
 
-        public ProductOrderRecord callCreateInProductOrderSerivce() {
-            return service.create(productorderRecord);
+        public ProductOrderRecord callCreateInProductOrderService() {
+            return service.create(productOrderRecord);
         }
 
         void findAllProductOrder() {
-            when(repository.findAll()).thenReturn(Collections.singletonList(productorder));
+            when(repository.findAll()).thenReturn(Collections.singletonList(productOrder));
         }
 
         public List<ProductOrderRecord> callListAllInProductOrderService() {
@@ -146,31 +167,58 @@ class ProductOrderServiceSucceedTest {
     
     class Then {
 
-        void shouldBeSuccessfulValidationRules(ProductOrderRecord record) {
-            assertNotNull(record);
-            assertNotNull(record.name());
-            assertEquals(record.name(), productorder.getStatus());
-            assertNotNull(record.id());
-            assertEquals(record.id(), productorder.getId());
-        }
+        class And extends Then {
 
+            Then and() {
+                return new Then();
+            }
+        }
+        public void shouldBeSuccessfulValidationRules(ProductOrderRecord record) {
+            assertNotNull(record);
+            assertNotNull(record.status());
+            assertEquals(record.status(), productOrder.getStatus());
+            assertNotNull(record.id());
+            assertEquals(record.id(), productOrder.getId());
+        }
         void shouldBeSuccessfulArgumentValidationByDelete() {
-            ArgumentCaptor<ProductOrder> productorderCaptor = ArgumentCaptor.forClass(ProductOrder.class);
-            verify(repository).delete(productorderCaptor.capture());
-            assertNotNull(productorderCaptor.getValue());
-            assertEquals(productorderCaptor.getValue().getStatus(),productorder.getStatus());
+            ArgumentCaptor<ProductOrder> productOrderCaptor = ArgumentCaptor.forClass(ProductOrder.class);
+            verify(repository).delete(productOrderCaptor.capture());
+            assertNotNull(productOrderCaptor.getValue());
+            assertEquals(productOrderCaptor.getValue().getStatus(), productOrder.getStatus());
         }
 
         void shouldBeSuccessfulArgumentValidationByUpdate() {
-            ArgumentCaptor<ProductOrder> productorderCaptor = ArgumentCaptor.forClass(ProductOrder.class);
-            verify(repository).save(productorderCaptor.capture());
-            assertNotNull(productorderCaptor.getValue());
-            assertEquals(productorderCaptor.getValue().getStatus(),productorder.getStatus());
+            ArgumentCaptor<ProductOrder> productOrderCaptor = ArgumentCaptor.forClass(ProductOrder.class);
+            verify(repository).save(productOrderCaptor.capture());
+            assertNotNull(productOrderCaptor.getValue());
+            assertEquals(productOrderCaptor.getValue().getStatus(), productOrder.getStatus());
         }
 
-        void shouldBeSuccessfulArgumentValidationByListAll(List<ProductOrderRecord> productorderRecords) {
-            assertNotNull(productorderRecords);
-            assertFalse(productorderRecords.isEmpty());
+        void shouldBeSuccessfulArgumentValidationByListAll(List<ProductOrderRecord> productOrderRecords) {
+            assertNotNull(productOrderRecords);
+            assertFalse(productOrderRecords.isEmpty());
         }
+
+        public And shouldBeSuccessGivenFind() {
+            ArgumentCaptor<UUID> productOrderCaptor = ArgumentCaptor.forClass(UUID.class);
+            verify(repository).findById(productOrderCaptor.capture());
+            UUID productOrderId = productOrderCaptor.getValue();
+            assertNotNull(productOrderId);
+            return new And();
+        }
+
+        public And shouldBeSuccessGivenCreate() {
+            ArgumentCaptor<ProductOrder> captor = ArgumentCaptor.forClass(ProductOrder.class);
+            verify(repository).save(captor.capture());
+            ProductOrder productOrderCaptor = captor.getValue();
+            assertNotNull(productOrderCaptor);
+            assertNotNull(productOrderCaptor.getStatus());
+            assertNotNull(productOrderCaptor.getItems());
+            assertFalse(productOrderCaptor.getItems().isEmpty());
+            assertNotNull(productOrderCaptor.getItems().stream().findAny().get());
+            return new And();
+        }
+
     }
+
 }

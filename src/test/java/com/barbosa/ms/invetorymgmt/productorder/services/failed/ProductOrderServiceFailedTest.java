@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -96,7 +97,7 @@ class ProductOrderServiceFailedTest {
         }
 
         void productorderRecordInicietedForFailueReturn () {
-            productorderRecord = new ProductOrderRecord(productorder.getId(), null);
+            productorderRecord = new ProductOrderRecord(productorder.getId(), null, Collections.emptySet());
         }
     }
 

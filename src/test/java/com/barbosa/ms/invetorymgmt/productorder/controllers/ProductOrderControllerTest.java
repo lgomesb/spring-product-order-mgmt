@@ -55,7 +55,7 @@ class ProductOrderControllerTest {
         MockitoAnnotations.openMocks(this);
         productorderRecord = ProductOrderRecord.builder()
                 .id(UUID.randomUUID())
-                .name("Test-ProductOrder-01")
+                .status("A")
                 .build();
 
     }
@@ -69,7 +69,7 @@ class ProductOrderControllerTest {
         Response response = given()
             .port(port)
             .contentType(ContentType.JSON)
-            .body("{\"name\": \""+ productorderRecord.name() +"\"}")
+            .body("{\"status\": \""+ productorderRecord.status() +"\"}")
             .log().all()
             .when()
             .post(STATIC_URI)
@@ -150,7 +150,10 @@ class ProductOrderControllerTest {
     @Order(4)
     void shouldSucceededWhenCallListAll() {
         when(service.listAll()).thenReturn(
-                Collections.singletonList(new ProductOrderRecord(STATIC_UUID, "Test-ProductOrder-01")));
+                Collections.singletonList(new ProductOrderRecord(
+                        STATIC_UUID,
+                        "A",
+                        Collections.emptySet())));
 
         given()
                 .port(port)

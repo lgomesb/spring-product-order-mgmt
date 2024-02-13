@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +29,9 @@ public class ProductOrderController {
     @PostMapping
     public ResponseEntity<ProductOrderResponseDTO> create(@RequestBody @Valid ProductOrderRequestDTO dto) {
 
-        ProductOrderRecord productorderRecord = service.create(new ProductOrderRecord(null, dto.getName()));
+        ProductOrderRecord productorderRecord = service.create(ProductOrderRecord
+                .builder()
+                .build());
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -44,14 +47,14 @@ public class ProductOrderController {
         ProductOrderRecord productorderRecord = service.findById(UUID.fromString(id));
         return ResponseEntity.ok().body(ProductOrderResponseDTO.builder()
                 .id(productorderRecord.id())
-                .name(productorderRecord.name())
+                .name(productorderRecord.status())
                 .build());
     }
 
     @Operation(summary = "Update ProductOrder by Id", description = "Update ProductOrder by id", tags = { "ProductOrder" })
     @PutMapping("{id}")
     public ResponseEntity<Void> update(@PathVariable("id") String id, @RequestBody ProductOrderRequestDTO dto) {
-        service.update(new ProductOrderRecord(UUID.fromString(id), dto.getName()));
+        service.update(new ProductOrderRecord(UUID.fromString(id), dto.getName(), Collections.emptySet()));
         return ResponseEntity.accepted().build();
     }
 

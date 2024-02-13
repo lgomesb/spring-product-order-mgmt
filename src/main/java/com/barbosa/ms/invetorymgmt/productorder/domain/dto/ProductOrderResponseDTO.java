@@ -10,7 +10,7 @@ public class ProductOrderResponseDTO extends ResponseDTO {
     public static ProductOrderResponseDTO create(ProductOrderRecord productorderRecord) {
        return ProductOrderResponseDTO.builder()
                 .id(productorderRecord.id())
-                .name(productorderRecord.name())
+                .name(productorderRecord.status())
                 .build();
     }
 
