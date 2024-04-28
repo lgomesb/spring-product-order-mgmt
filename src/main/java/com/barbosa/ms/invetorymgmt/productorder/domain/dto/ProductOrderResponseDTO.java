@@ -1,23 +1,23 @@
 package com.barbosa.ms.invetorymgmt.productorder.domain.dto;
 
-import com.barbosa.ms.invetorymgmt.productorder.domain.records.ProductOrderRecord;
+import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
 import lombok.Builder;
 
 import java.util.UUID;
 
 public class ProductOrderResponseDTO extends ResponseDTO {
 
-    public static ProductOrderResponseDTO create(ProductOrderRecord productorderRecord) {
+    public static ProductOrderResponseDTO create(ProductOrderRecordIn productorderRecordIn) {
        return ProductOrderResponseDTO.builder()
-                .id(productorderRecord.id())
-                .name(productorderRecord.status())
+                .id(productorderRecordIn.id())
+                .description(productorderRecordIn.description())
                 .build();
     }
 
     @Builder
-    public ProductOrderResponseDTO(UUID id, String name) {
+    public ProductOrderResponseDTO(UUID id, String description) {
         super();
         super.setId(id);
-        super.setName(name);
+        super.setDescription(description);
     }
 }

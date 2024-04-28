@@ -12,9 +12,9 @@ spring:
     jpa:
         show-sql: true
         properties:
-            hibernate:
-                format-sql: true
-    flyway: 
+          hibernate:
+            format_sql: true
+    flyway:
       enabled: false
 
 springdoc:

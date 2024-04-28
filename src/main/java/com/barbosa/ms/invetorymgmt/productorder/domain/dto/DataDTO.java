@@ -8,9 +8,9 @@ import lombok.Data;
 @Data
 public abstract class DataDTO {
     
-    @NotNull(message = "{field.name.required}")
-    @NotBlank(message = "{field.name.not-blank}")
-    @NotEmpty(message = "{field.name.required}")
-    private String name;
+    @NotNull(message = "{field.description.required}")
+    @NotBlank(message = "{field.description.not-blank}")
+    @NotEmpty(message = "{field.description.required}")
+    private String description;
     
 }

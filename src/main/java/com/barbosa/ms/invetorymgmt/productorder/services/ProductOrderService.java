@@ -1,7 +1,7 @@
 package com.barbosa.ms.invetorymgmt.productorder.services;
 
-import com.barbosa.ms.invetorymgmt.productorder.domain.records.ProductOrderRecord;
+import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
 
-public interface ProductOrderService extends DomainService<ProductOrderRecord>{
+public interface ProductOrderService extends DomainService<ProductOrderRecordIn>{
     
 }

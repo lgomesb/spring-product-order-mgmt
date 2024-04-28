@@ -3,7 +3,7 @@ package com.barbosa.ms.invetorymgmt.productorder.services.impl;
 import com.barbosa.ms.invetorymgmt.productorder.domain.entities.OrderItem;
 import com.barbosa.ms.invetorymgmt.productorder.domain.entities.ProductOrder;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.OrderItemRecord;
-import com.barbosa.ms.invetorymgmt.productorder.domain.records.ProductOrderRecord;
+import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
 import com.barbosa.ms.invetorymgmt.productorder.repositories.ProductOrderRepository;
 import com.barbosa.ms.invetorymgmt.productorder.services.ProductOrderService;
 import org.hibernate.ObjectNotFoundException;
@@ -27,11 +27,11 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     }
 
     @Override
-    public ProductOrderRecord create(ProductOrderRecord recordObject) {
+    public ProductOrderRecordIn create(ProductOrderRecordIn recordObject) {
 
         ProductOrder productOrder = ProductOrder
                 .builder()
-                .status(recordObject.status())
+                .description(recordObject.description())
                 .build();
 
         final ProductOrder productOrderItem = productOrder;
@@ -44,9 +44,10 @@ public class ProductOrderServiceImpl implements ProductOrderService {
         productOrder.setItems(items);
         productOrder = repository.save(productOrder);
 
-        return ProductOrderRecord
+        return ProductOrderRecordIn
                 .builder()
                 .status(productOrder.getStatus())
+                .description(productOrder.getDescription())
                 .id(productOrder.getId())
                 .items(productOrder.getItems()
                         .stream()
@@ -56,10 +57,11 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     }
 
     @Override
-    public ProductOrderRecord findById(UUID id) {
+    public ProductOrderRecordIn findById(UUID id) {
         ProductOrder productOrder = this.getProductOrderById(id);
-        return ProductOrderRecord
+        return ProductOrderRecordIn
                 .builder()
+                .description(productOrder.getDescription())
                 .status(productOrder.getStatus())
                 .id(productOrder.getId())
                 .items(productOrder.getItems()
@@ -71,9 +73,10 @@ public class ProductOrderServiceImpl implements ProductOrderService {
 
     
     @Override
-    public void update(ProductOrderRecord recordObject) {
+    public void update(ProductOrderRecordIn recordObject) {
         ProductOrder productorder = this.getProductOrderById(recordObject.id());
-        productorder.setStatus(recordObject.status());
+        productorder.setDescription(recordObject.description());
+        productorder.setStatus(recordObject.description());
         productorder.setModifiedOn(LocalDateTime.now());
         productorder.setModifiedBy("99999");
         repository.save(productorder);
@@ -92,12 +95,13 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     }
 
     @Override
-    public List<ProductOrderRecord> listAll() {
+    public List<ProductOrderRecordIn> listAll() {
         return repository.findAll()
             .stream()
-            .map(entity -> ProductOrderRecord.builder()
+            .map(entity -> ProductOrderRecordIn.builder()
                     .id(entity.getId())
                     .status(entity.getStatus())
+                    .description(entity.getDescription())
                     .build())
             .toList();
     }

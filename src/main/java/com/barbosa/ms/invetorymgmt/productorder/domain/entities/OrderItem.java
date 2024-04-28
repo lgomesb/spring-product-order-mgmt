@@ -5,10 +5,10 @@ import lombok.*;
 
 import java.util.UUID;
 
-@Getter
-@Setter
 @ToString(of = {"productId", "quantity"})
+@EqualsAndHashCode(of = {"productId", "quantity"}, callSuper = false)
 @NoArgsConstructor
+@Data
 @Table(name = "orderitem")
 @Entity
 public class OrderItem extends AbstractEntity {
