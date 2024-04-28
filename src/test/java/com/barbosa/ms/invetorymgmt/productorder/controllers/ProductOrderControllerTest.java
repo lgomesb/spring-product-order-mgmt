@@ -2,7 +2,7 @@ package com.barbosa.ms.invetorymgmt.productorder.controllers;
 
 import com.barbosa.ms.invetorymgmt.productorder.ProductOrderApplicationTests;
 import com.barbosa.ms.invetorymgmt.productorder.controller.ProductOrderController;
-import com.barbosa.ms.invetorymgmt.productorder.domain.records.ProductOrderRecord;
+import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
 import com.barbosa.ms.invetorymgmt.productorder.services.ProductOrderService;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -10,12 +10,11 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -37,7 +36,9 @@ import static org.mockito.Mockito.when;
 class ProductOrderControllerTest {
 
     private static UUID STATIC_UUID;
-    private static final String STATIC_URI = "/product-order/";
+
+    @Value("${server.servlet.context-path}/")
+    private String STATIC_URI;
 
     @LocalServerPort
     private int port;
@@ -48,12 +49,12 @@ class ProductOrderControllerTest {
     @InjectMocks
     private ProductOrderController controller;
 
-    private ProductOrderRecord productorderRecord;
+    private ProductOrderRecordIn productorderRecordIn;
 
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
-        productorderRecord = ProductOrderRecord.builder()
+        productorderRecordIn = ProductOrderRecordIn.builder()
                 .id(UUID.randomUUID())
                 .status("A")
                 .build();
@@ -64,12 +65,12 @@ class ProductOrderControllerTest {
     @Order(0)
     void shouldSucceededWhenCallCreate() throws UnknownHostException {
 
-        when(service.create(any(ProductOrderRecord.class))).thenReturn(productorderRecord);
+        when(service.create(any(ProductOrderRecordIn.class))).thenReturn(productorderRecordIn);
 
         Response response = given()
             .port(port)
             .contentType(ContentType.JSON)
-            .body("{\"status\": \""+ productorderRecord.status() +"\"}")
+            .body("{\"description\": \"test-01\"}")
             .log().all()
             .when()
             .post(STATIC_URI)
@@ -91,7 +92,7 @@ class ProductOrderControllerTest {
     @Test
     @Order(1)
     void shouldSucceededWhenCallFindById() {
-        when(service.findById(any(UUID.class))).thenReturn(productorderRecord);
+        when(service.findById(any(UUID.class))).thenReturn(productorderRecordIn);
 
         Response response = given()
             .port(port)
@@ -150,8 +151,9 @@ class ProductOrderControllerTest {
     @Order(4)
     void shouldSucceededWhenCallListAll() {
         when(service.listAll()).thenReturn(
-                Collections.singletonList(new ProductOrderRecord(
+                Collections.singletonList(new ProductOrderRecordIn(
                         STATIC_UUID,
+                        "product_order_test",
                         "A",
                         Collections.emptySet())));
 

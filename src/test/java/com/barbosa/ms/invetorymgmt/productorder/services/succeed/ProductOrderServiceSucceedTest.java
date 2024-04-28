@@ -3,7 +3,7 @@ package com.barbosa.ms.invetorymgmt.productorder.services.succeed;
 import com.barbosa.ms.invetorymgmt.productorder.domain.entities.OrderItem;
 import com.barbosa.ms.invetorymgmt.productorder.domain.entities.ProductOrder;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.OrderItemRecord;
-import com.barbosa.ms.invetorymgmt.productorder.domain.records.ProductOrderRecord;
+import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
 import com.barbosa.ms.invetorymgmt.productorder.repositories.ProductOrderRepository;
 import com.barbosa.ms.invetorymgmt.productorder.services.impl.ProductOrderServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ class ProductOrderServiceSucceedTest {
     private ProductOrder productOrder;
     private Set<OrderItem> items;
 
-    private ProductOrderRecord productOrderRecord;
+    private ProductOrderRecordIn productOrderRecordIn;
     private final Given given = new Given();
     private final When when = new When();
     private final Then then = new Then();
@@ -44,7 +44,7 @@ class ProductOrderServiceSucceedTest {
         given.productOrderInitiatedForSuccessfulReturn();
         given.productOrderRecordInitiatedForSuccessfulReturn();
         when.saveProductOrderEntity();
-        ProductOrderRecord record = when.callCreateInProductOrderService();
+        ProductOrderRecordIn record = when.callCreateInProductOrderService();
         then.shouldBeSuccessGivenCreate()
                 .and()
                 .shouldBeSuccessfulValidationRules(record);
@@ -54,7 +54,7 @@ class ProductOrderServiceSucceedTest {
     void shouldSuccessWhenFindById() {
         given.productOrderInitiatedForSuccessfulReturn();
         when.findProductOrderById();
-        ProductOrderRecord record = when.callProductOrderServiceFindById();
+        ProductOrderRecordIn record = when.callProductOrderServiceFindById();
         then.shouldBeSuccessGivenFind()
                 .and()
                 .shouldBeSuccessfulValidationRules(record);
@@ -84,8 +84,8 @@ class ProductOrderServiceSucceedTest {
     void shouldSuccessWhenListAll() {
         given.productOrderInitiatedForSuccessfulReturn();
         when.findAllProductOrder();
-        List<ProductOrderRecord>  productOrderRecords = when.callListAllInProductOrderService();
-        then.shouldBeSuccessfulArgumentValidationByListAll(productOrderRecords);
+        List<ProductOrderRecordIn> productOrderRecordIns = when.callListAllInProductOrderService();
+        then.shouldBeSuccessfulArgumentValidationByListAll(productOrderRecordIns);
     }
 
     class Given {
@@ -98,6 +98,7 @@ class ProductOrderServiceSucceedTest {
            productOrder = ProductOrder.builder()
                         .id(creationIdOfProductOrder())
                         .status("A")
+                        .description("Test-01")
                         .build();
             this.orderItemsInitiatedForSuccessfulReturn();
         }
@@ -112,10 +113,11 @@ class ProductOrderServiceSucceedTest {
         }
 
         void productOrderRecordInitiatedForSuccessfulReturn() {
-            productOrderRecord = ProductOrderRecord
+            productOrderRecordIn = ProductOrderRecordIn
                     .builder()
                     .id(productOrder.getId())
                     .status(productOrder.getStatus())
+                    .description("Test-01")
                     .items(items
                             .stream()
                             .map(i -> new OrderItemRecord(i.getProductId(), i.getQuantity()))
@@ -133,7 +135,7 @@ class ProductOrderServiceSucceedTest {
         }
 
         void callProductOrderServiceUpdate() {
-            service.update(productOrderRecord);
+            service.update(productOrderRecordIn);
         }
 
         void callDeleteInProductOrderService() {
@@ -144,7 +146,7 @@ class ProductOrderServiceSucceedTest {
             doNothing().when(repository).delete(any(ProductOrder.class));
         }
 
-        public ProductOrderRecord callProductOrderServiceFindById() {
+        public ProductOrderRecordIn callProductOrderServiceFindById() {
             return service.findById(given.creationIdOfProductOrder());
         }
 
@@ -152,15 +154,15 @@ class ProductOrderServiceSucceedTest {
             when(repository.findById(any(UUID.class))).thenReturn(Optional.of(productOrder));
         }
 
-        public ProductOrderRecord callCreateInProductOrderService() {
-            return service.create(productOrderRecord);
+        public ProductOrderRecordIn callCreateInProductOrderService() {
+            return service.create(productOrderRecordIn);
         }
 
         void findAllProductOrder() {
             when(repository.findAll()).thenReturn(Collections.singletonList(productOrder));
         }
 
-        public List<ProductOrderRecord> callListAllInProductOrderService() {
+        public List<ProductOrderRecordIn> callListAllInProductOrderService() {
             return service.listAll();
         }
     }
@@ -173,10 +175,10 @@ class ProductOrderServiceSucceedTest {
                 return new Then();
             }
         }
-        public void shouldBeSuccessfulValidationRules(ProductOrderRecord record) {
+        public void shouldBeSuccessfulValidationRules(ProductOrderRecordIn record) {
             assertNotNull(record);
-            assertNotNull(record.status());
-            assertEquals(record.status(), productOrder.getStatus());
+            assertNotNull(record.description());
+            assertEquals(record.description(), productOrder.getDescription());
             assertNotNull(record.id());
             assertEquals(record.id(), productOrder.getId());
         }
@@ -194,9 +196,9 @@ class ProductOrderServiceSucceedTest {
             assertEquals(productOrderCaptor.getValue().getStatus(), productOrder.getStatus());
         }
 
-        void shouldBeSuccessfulArgumentValidationByListAll(List<ProductOrderRecord> productOrderRecords) {
-            assertNotNull(productOrderRecords);
-            assertFalse(productOrderRecords.isEmpty());
+        void shouldBeSuccessfulArgumentValidationByListAll(List<ProductOrderRecordIn> productOrderRecordIns) {
+            assertNotNull(productOrderRecordIns);
+            assertFalse(productOrderRecordIns.isEmpty());
         }
 
         public And shouldBeSuccessGivenFind() {
@@ -212,7 +214,7 @@ class ProductOrderServiceSucceedTest {
             verify(repository).save(captor.capture());
             ProductOrder productOrderCaptor = captor.getValue();
             assertNotNull(productOrderCaptor);
-            assertNotNull(productOrderCaptor.getStatus());
+            assertNotNull(productOrderCaptor.getDescription());
             assertNotNull(productOrderCaptor.getItems());
             assertFalse(productOrderCaptor.getItems().isEmpty());
             assertNotNull(productOrderCaptor.getItems().stream().findAny().get());

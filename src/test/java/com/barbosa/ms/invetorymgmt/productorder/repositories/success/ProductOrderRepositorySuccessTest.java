@@ -60,6 +60,7 @@ class ProductOrderRepositorySuccessTest {
 
         ProductOrder productorder = ProductOrder
                 .builder()
+                .description("Test-01")
                 .status(status)
                 .build();
         Set<OrderItem> items = Collections.singleton(OrderItem
