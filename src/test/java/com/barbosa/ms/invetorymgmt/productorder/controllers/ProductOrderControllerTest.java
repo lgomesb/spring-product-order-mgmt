@@ -2,14 +2,16 @@ package com.barbosa.ms.invetorymgmt.productorder.controllers;
 
 import com.barbosa.ms.invetorymgmt.productorder.ProductOrderApplicationTests;
 import com.barbosa.ms.invetorymgmt.productorder.controller.ProductOrderController;
+import com.barbosa.ms.invetorymgmt.productorder.domain.records.OrderItemRecord;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
 import com.barbosa.ms.invetorymgmt.productorder.services.ProductOrderService;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -29,6 +31,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
 
+@ExtendWith(MockitoExtension.class)
 @ActiveProfiles(value = "test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(classes = {ProductOrderApplicationTests.class}, webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -53,10 +56,11 @@ class ProductOrderControllerTest {
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
         productorderRecordIn = ProductOrderRecordIn.builder()
                 .id(UUID.randomUUID())
                 .status("A")
+                .description("test-01")
+                .items(Collections.singleton(new OrderItemRecord(UUID.randomUUID(), 1)))
                 .build();
 
     }
@@ -70,7 +74,7 @@ class ProductOrderControllerTest {
         Response response = given()
             .port(port)
             .contentType(ContentType.JSON)
-            .body("{\"description\": \"test-01\"}")
+            .body("{\"description\": \"string\",\"items\": [{\"productId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"quantity\": 1}]}")
             .log().all()
             .when()
             .post(STATIC_URI)
@@ -120,7 +124,7 @@ class ProductOrderControllerTest {
             .port(port)
             .contentType(ContentType.JSON)
             .pathParam("id", STATIC_UUID.toString())
-            .body("{\"name\": \"Teste-2\"}")
+            .body("{\"description\": \"update-test-01\",\"items\": [{\"productId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"quantity\": 5}]}")
             .log().all()
             .when()
             .put(STATIC_URI + "{id}")
