@@ -1,7 +1,9 @@
 package com.barbosa.ms.invetorymgmt.productorder.controller;
 
+import com.barbosa.ms.invetorymgmt.productorder.domain.dto.OrderItemDTO;
 import com.barbosa.ms.invetorymgmt.productorder.domain.dto.ProductOrderRequestDTO;
 import com.barbosa.ms.invetorymgmt.productorder.domain.dto.ProductOrderResponseDTO;
+import com.barbosa.ms.invetorymgmt.productorder.domain.records.OrderItemRecord;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
 import com.barbosa.ms.invetorymgmt.productorder.services.ProductOrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +16,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Tag(name = "ProductOrder", description = "Endpoints for ProductOrder operations")
 @RestController
@@ -31,9 +35,18 @@ public class ProductOrderController {
     @PostMapping
     public ResponseEntity<ProductOrderResponseDTO> create(@RequestBody @Valid ProductOrderRequestDTO dto) {
 
+        Set<OrderItemRecord> items = dto.getItems()
+                .stream()
+                .map(i -> OrderItemRecord.builder()
+                        .productId(i.getProductId())
+                        .quantity(i.getQuantity())
+                        .build())
+                .collect(Collectors.toSet());
+
         ProductOrderRecordIn productorderRecordIn = service.create(ProductOrderRecordIn
                 .builder()
                 .description(dto.getDescription())
+                .items(items)
                 .build());
 
         URI location = ServletUriComponentsBuilder
@@ -51,6 +64,10 @@ public class ProductOrderController {
         return ResponseEntity.ok().body(ProductOrderResponseDTO.builder()
                 .id(productorderRecordIn.id())
                 .description(productorderRecordIn.description())
+                .items(productorderRecordIn.items()
+                        .stream()
+                        .map(i -> new OrderItemDTO(i.productId(), i.quantity()))
+                        .collect(Collectors.toList()))
                 .build());
     }
 
