@@ -71,15 +71,14 @@ public class ProductOrderServiceImpl implements ProductOrderService {
                 .build();
     }
 
-    
     @Override
     public void update(ProductOrderRecordIn recordObject) {
-        ProductOrder productorder = this.getProductOrderById(recordObject.id());
-        productorder.setDescription(recordObject.description());
-        productorder.setStatus(recordObject.description());
-        productorder.setModifiedOn(LocalDateTime.now());
-        productorder.setModifiedBy("99999");
-        repository.save(productorder);
+        ProductOrder productOrder = this.getProductOrderById(recordObject.id());
+        productOrder.setDescription(recordObject.description());
+        productOrder.setStatus(recordObject.description());
+        productOrder.setModifiedOn(LocalDateTime.now());
+        productOrder.setModifiedBy("99999");
+        repository.save(productOrder);
     }
     
     @Override

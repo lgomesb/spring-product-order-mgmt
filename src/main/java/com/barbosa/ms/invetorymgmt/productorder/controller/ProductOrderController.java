@@ -74,8 +74,7 @@ public class ProductOrderController {
     @Operation(summary = "Update ProductOrder by Id", description = "Update ProductOrder by id", tags = { "ProductOrder" })
     @PutMapping("{id}")
     public ResponseEntity<Void> update(@PathVariable("id") String id, @RequestBody ProductOrderRequestDTO dto) {
-        service.update(ProductOrderRecordIn
-                .builder()
+        service.update(ProductOrderRecordIn.builder()
                         .id(UUID.fromString(id))
                         .items(Collections.emptySet())
                         .description(dto.getDescription())

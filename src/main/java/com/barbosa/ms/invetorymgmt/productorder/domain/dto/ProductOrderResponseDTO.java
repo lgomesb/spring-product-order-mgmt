@@ -17,6 +17,9 @@ public class ProductOrderResponseDTO extends ResponseDTO {
        return ProductOrderResponseDTO.builder()
                 .id(productorderRecordIn.id())
                 .description(productorderRecordIn.description())
+               .items(productorderRecordIn.items().stream()
+                       .map(OrderItemDTO::create)
+                       .toList())
                 .build();
     }
 
