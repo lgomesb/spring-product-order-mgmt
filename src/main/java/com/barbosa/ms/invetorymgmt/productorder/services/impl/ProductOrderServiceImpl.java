@@ -101,6 +101,10 @@ public class ProductOrderServiceImpl implements ProductOrderService {
                     .id(entity.getId())
                     .status(entity.getStatus())
                     .description(entity.getDescription())
+                    .items(entity.getItems()
+                            .stream()
+                            .map(i -> new OrderItemRecord(i.getProductId(), i.getQuantity()))
+                                .collect(Collectors.toSet()))
                     .build())
             .toList();
     }

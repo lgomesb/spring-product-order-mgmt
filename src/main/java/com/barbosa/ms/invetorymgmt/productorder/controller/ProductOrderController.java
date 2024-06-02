@@ -9,11 +9,10 @@ import com.barbosa.ms.invetorymgmt.productorder.services.ProductOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -49,12 +48,9 @@ public class ProductOrderController {
                 .items(items)
                 .build());
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("{id}")
-                .buildAndExpand(productorderRecordIn.id())
-                .toUri();
-        return ResponseEntity.created(location).build();
+        ProductOrderResponseDTO response = ProductOrderResponseDTO.create(productorderRecordIn);
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Find ProductOrder by Id", description = "Find ProductOrder by id", tags = { "ProductOrder" })
@@ -67,7 +63,7 @@ public class ProductOrderController {
                 .items(productorderRecordIn.items()
                         .stream()
                         .map(i -> new OrderItemDTO(i.productId(), i.quantity()))
-                        .collect(Collectors.toList()))
+                        .toList())
                 .build());
     }
 

@@ -1,14 +1,15 @@
 package com.barbosa.ms.invetorymgmt.productorder.domain.dto;
 
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
-import lombok.Builder;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@Setter
+@EqualsAndHashCode(callSuper = false)
+@NoArgsConstructor
+@Data
 public class ProductOrderResponseDTO extends ResponseDTO {
 
     private List<OrderItemDTO> items;
