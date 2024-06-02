@@ -16,7 +16,7 @@ import java.util.UUID;
 @EqualsAndHashCode(of = {"description", "status", "items"}, callSuper = false)
 @NoArgsConstructor
 @Data
-@Table(name = "productorder")
+@Table
 @Entity
 public class ProductOrder extends AbstractEntity {
 

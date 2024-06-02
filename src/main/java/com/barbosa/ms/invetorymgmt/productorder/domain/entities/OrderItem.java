@@ -9,7 +9,7 @@ import java.util.UUID;
 @EqualsAndHashCode(of = {"productId", "quantity"}, callSuper = false)
 @NoArgsConstructor
 @Data
-@Table(name = "orderitem")
+@Table
 @Entity
 public class OrderItem extends AbstractEntity {
 
