@@ -1,7 +1,10 @@
 package com.barbosa.ms.invetorymgmt.productorder.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -30,10 +33,16 @@ public abstract class AbstractEntity implements Serializable {
     @Column(name = "modified_by", columnDefinition = "varchar(100)")
     private String modifiedBy;
 
+    @PreUpdate
     @PrePersist
     public void prePersist() {
-        setCreatedOn(LocalDateTime.now());
-        setCreatedBy("99999");
+        if(this.createdOn == null) {
+            this.setCreatedOn(LocalDateTime.now());
+            this.setCreatedBy("99999");
+        } else {
+            this.setModifiedOn(LocalDateTime.now());
+            this.setModifiedBy("88888");
+        }
     }
-    
+
 }
