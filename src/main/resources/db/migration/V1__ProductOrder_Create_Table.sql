@@ -5,7 +5,7 @@ create table Product_Order (
     created_on timestamp(6),
     modified_by varchar(100),
     modified_on timestamp(6),
-    status varchar(1) not null default 'A',
+    status varchar(20) not null default 'DRAFT',
     primary key (id)
 );
 
