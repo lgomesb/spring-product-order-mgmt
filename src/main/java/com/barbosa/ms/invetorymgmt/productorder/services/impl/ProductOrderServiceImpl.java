@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,9 +73,32 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     public void update(ProductOrderRecordIn recordObject) {
         ProductOrder productOrder = this.getProductOrderById(recordObject.id());
         productOrder.setDescription(recordObject.description());
-        productOrder.setStatus(recordObject.description());
-        productOrder.setModifiedOn(LocalDateTime.now());
-        productOrder.setModifiedBy("99999");
+
+        recordObject.items().forEach(i -> {
+            Optional<OrderItem> oOrderItem = productOrder.getItems().stream()
+                    .filter(item -> item.getProductId().equals(i.productId()))
+                    .findFirst();
+
+            if(oOrderItem.isPresent()) {
+                oOrderItem.get().setQuantity(i.quantity());
+            } else {
+                productOrder.addItem(
+                        OrderItem.builder()
+                                .productId(i.productId())
+                                .quantity(i.quantity())
+                                .build()
+                );
+            }
+
+        });
+
+        Set<OrderItem> orderItemsRemove = new HashSet<>();
+        for (OrderItem item : productOrder.getItems()) {
+            if (recordObject.items().stream().noneMatch(i -> item.getProductId().equals(i.productId()))){
+                orderItemsRemove.add(item);
+            }
+        }
+        orderItemsRemove.forEach(productOrder::removeItem);
         repository.save(productOrder);
     }
     
@@ -108,6 +129,12 @@ public class ProductOrderServiceImpl implements ProductOrderService {
                     .build())
             .toList();
     }
-    
-    
+
+
+    @Override
+    public void updateStatus(ProductOrderRecordIn productOrderRecordIn) {
+        ProductOrder productorder = this.getProductOrderById(productOrderRecordIn.id());
+        productorder.setStatus(productOrderRecordIn.status());
+        repository.save(productorder);
+    }
 }
