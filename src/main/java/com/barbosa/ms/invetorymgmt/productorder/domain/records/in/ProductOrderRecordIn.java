@@ -7,6 +7,9 @@ import java.util.Set;
 import java.util.UUID;
 
 @Builder
-public record ProductOrderRecordIn(UUID id, String description, String status, Set<OrderItemRecord> items) {
+public record ProductOrderRecordIn(UUID id,
+                                   String description,
+                                   String status,
+                                   Set<OrderItemRecord> items) {
 
 }
