@@ -60,5 +60,16 @@ public class ProductOrderExceptionHandler {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err); 
         }
 
+        @ExceptionHandler( IllegalArgumentException.class )
+        public ResponseEntity<StandardError> illegalArgumentException( IllegalArgumentException e, HttpServletRequest request) {
+            StandardError err = StandardError.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error("Resource returned: " + HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .messege(e.getMessage())
+                .path(request.getRequestURI())
+                .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
+        }
+
     }
     
