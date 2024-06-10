@@ -4,6 +4,8 @@ import com.barbosa.ms.invetorymgmt.productorder.ProductOrderApplicationTests;
 import com.barbosa.ms.invetorymgmt.productorder.controller.ProductOrderController;
 import com.barbosa.ms.invetorymgmt.productorder.domain.dto.OrderItemDTO;
 import com.barbosa.ms.invetorymgmt.productorder.domain.dto.ProductOrderRequestDTO;
+import com.barbosa.ms.invetorymgmt.productorder.domain.dto.ProductOrderResponseDTO;
+import com.barbosa.ms.invetorymgmt.productorder.domain.dto.StatusProductOrderEnum;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.OrderItemRecord;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
 import com.barbosa.ms.invetorymgmt.productorder.services.ProductOrderService;
@@ -66,7 +68,7 @@ class ProductOrderControllerTest {
     void setup() {
         productorderRecordIn = ProductOrderRecordIn.builder()
                 .id(PRODUCT_ORDER_UUID)
-                .status("A")
+                .status(StatusProductOrderEnum.DRAFT.name())
                 .description("test-01")
                 .items(Collections.singleton(new OrderItemRecord(UUID.randomUUID(), 1)))
                 .build();
@@ -144,7 +146,7 @@ class ProductOrderControllerTest {
             List<ProductOrderRecordIn> retVal = Collections.singletonList(new ProductOrderRecordIn(
                     PRODUCT_ORDER_UUID,
                     "product_order_test",
-                    "A",
+                    StatusProductOrderEnum.DRAFT.name(),
                     Collections.singleton(new OrderItemRecord(UUID.randomUUID(), 1))));
 
             doReturn(retVal)
@@ -218,11 +220,11 @@ class ProductOrderControllerTest {
     private class Then {
         public void productOrderCreationResponseIsValid(Response response) {
             assertNotNull(response);
-            String idProductOrder = response.getHeader("Location");
-            idProductOrder = idProductOrder.substring(idProductOrder.lastIndexOf("/")+1);
-            assertNotNull(idProductOrder);
-            assertFalse(idProductOrder.isEmpty());
-            PRODUCT_ORDER_UUID = UUID.fromString(idProductOrder);
+            assertEquals(HttpStatus.CREATED.value(), response.getStatusCode());
+            ProductOrderResponseDTO productOrderResponseDTO = response.getBody().as(ProductOrderResponseDTO.class);
+            assertNotNull(productOrderResponseDTO);
+            assertNotNull(productOrderResponseDTO.getId());
+
         }
 
         public void productOrderSearchedResponseIsValid(Response response) {
@@ -244,6 +246,14 @@ class ProductOrderControllerTest {
             assertNotNull(response);
             assertEquals(response.getStatusCode(), HttpStatus.OK.value());
             assertInstanceOf(ArrayList.class, response.getBody().jsonPath().get());
+        }
+
+        private static void checkProductId(Response response) {
+            String idProductOrder = response.getHeader("Location");
+            idProductOrder = idProductOrder.substring(idProductOrder.lastIndexOf("/")+1);
+            assertNotNull(idProductOrder);
+            assertFalse(idProductOrder.isEmpty());
+            PRODUCT_ORDER_UUID = UUID.fromString(idProductOrder);
         }
     }
 }

@@ -99,6 +99,7 @@ class ProductOrderServiceSucceedTest {
                         .id(creationIdOfProductOrder())
                         .status("A")
                         .description("Test-01")
+                        .items(Collections.singleton(new OrderItem(UUID.randomUUID(), 12, productOrder)))
                         .build();
             this.orderItemsInitiatedForSuccessfulReturn();
         }
