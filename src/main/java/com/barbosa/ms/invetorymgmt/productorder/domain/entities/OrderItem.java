@@ -22,6 +22,7 @@ public class OrderItem extends AbstractEntity {
     @ManyToOne
     @JoinColumn(name = "productOrder_id", nullable = false)
     private ProductOrder productOrder;
+
     @Builder
     public OrderItem(UUID productId, int quantity, ProductOrder productOrder) {
         this.productId = productId;
