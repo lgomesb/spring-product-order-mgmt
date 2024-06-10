@@ -14,22 +14,24 @@ public class ProductOrderResponseDTO extends ResponseDTO {
 
     private List<OrderItemDTO> items;
 
+    private StatusProductOrderEnum status;
+
     public static ProductOrderResponseDTO create(ProductOrderRecordIn productorderRecordIn) {
-       return ProductOrderResponseDTO.builder()
+        return ProductOrderResponseDTO.builder()
                 .id(productorderRecordIn.id())
                 .description(productorderRecordIn.description())
-               .items(productorderRecordIn.items().stream()
-                       .map(OrderItemDTO::create)
-                       .toList())
+                .status(StatusProductOrderEnum.valueOf(productorderRecordIn.status()))
+                .items(productorderRecordIn.items().stream().map(OrderItemDTO::create).toList())
                 .build();
     }
 
     @Builder
-    public ProductOrderResponseDTO(UUID id, String description, List<OrderItemDTO> items) {
+    public ProductOrderResponseDTO(UUID id, String description, List<OrderItemDTO> items, StatusProductOrderEnum status) {
         super();
         super.setId(id);
         super.setDescription(description);
         this.items = items;
+        this.status = status;
     }
 
     public List<OrderItemDTO> getItems() {
