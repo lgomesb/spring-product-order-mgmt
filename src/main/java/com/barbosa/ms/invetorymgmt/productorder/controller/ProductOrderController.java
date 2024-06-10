@@ -3,6 +3,7 @@ package com.barbosa.ms.invetorymgmt.productorder.controller;
 import com.barbosa.ms.invetorymgmt.productorder.domain.dto.OrderItemDTO;
 import com.barbosa.ms.invetorymgmt.productorder.domain.dto.ProductOrderRequestDTO;
 import com.barbosa.ms.invetorymgmt.productorder.domain.dto.ProductOrderResponseDTO;
+import com.barbosa.ms.invetorymgmt.productorder.domain.dto.StatusProductOrderRequestDTO;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.OrderItemRecord;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
 import com.barbosa.ms.invetorymgmt.productorder.services.ProductOrderService;
@@ -72,8 +73,20 @@ public class ProductOrderController {
     public ResponseEntity<Void> update(@PathVariable("id") String id, @RequestBody ProductOrderRequestDTO dto) {
         service.update(ProductOrderRecordIn.builder()
                         .id(UUID.fromString(id))
-                        .items(Collections.emptySet())
+                        .items(dto.getItems().stream()
+                                .map(i -> new OrderItemRecord(i.getProductId(), i.getQuantity()) )
+                                .collect(Collectors.toSet()))
                         .description(dto.getDescription())
+                .build());
+        return ResponseEntity.accepted().build();
+    }
+
+    @Operation(summary = "Update Status of ProductOrder", description = "Update Status of ProductOrder by id", tags = { "ProductOrder" })
+    @PatchMapping("{id}")
+    public ResponseEntity<Void> updateStatus(@PathVariable("id") String id, @RequestBody StatusProductOrderRequestDTO dto) {
+        service.updateStatus(ProductOrderRecordIn.builder()
+                        .id(UUID.fromString(id))
+                        .status(dto.getStatus().name())
                 .build());
         return ResponseEntity.accepted().build();
     }
