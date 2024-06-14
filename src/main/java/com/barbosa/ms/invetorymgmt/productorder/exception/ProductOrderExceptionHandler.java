@@ -71,5 +71,16 @@ public class ProductOrderExceptionHandler {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
         }
 
+        @ExceptionHandler( ProductOrderAlreadyCompletedException.class )
+        public ResponseEntity<StandardError> productOrderAlreadyCompletedException( ProductOrderAlreadyCompletedException e, HttpServletRequest request) {
+            StandardError err = StandardError.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Resource returned: " + HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .messege(e.getMessage())
+                .path(request.getRequestURI())
+                .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+        }
+
     }
     
