@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public enum StatusProductOrderEnum {
     DRAFT,
-    ACCEPTED,
-    REJECT,
+    APPROVED,
+    REJECTED,
     COMPLETED;
 
     public static StatusProductOrderEnum getByName(String name) {
