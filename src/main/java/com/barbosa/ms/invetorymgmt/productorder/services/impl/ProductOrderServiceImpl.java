@@ -1,22 +1,27 @@
 package com.barbosa.ms.invetorymgmt.productorder.services.impl;
 
+import com.barbosa.ms.invetorymgmt.productorder.domain.dto.StatusProductOrderEnum;
 import com.barbosa.ms.invetorymgmt.productorder.domain.entities.OrderItem;
 import com.barbosa.ms.invetorymgmt.productorder.domain.entities.ProductOrder;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.OrderItemRecord;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
+import com.barbosa.ms.invetorymgmt.productorder.exception.InvalidProductOrderStatusException;
 import com.barbosa.ms.invetorymgmt.productorder.repositories.ProductOrderRepository;
 import com.barbosa.ms.invetorymgmt.productorder.services.ProductOrderService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.barbosa.ms.invetorymgmt.productorder.domain.dto.StatusProductOrderEnum.*;
 
 @Service
 public class ProductOrderServiceImpl implements ProductOrderService {
 
+    public static final String PRODUCT_ORDER_HAS_ALREADY_BEEN = "Product order has already been %s.";
+    public static final String PRODUCT_ORDER_STATUS_MUST_BE_FIRST = "Product order status must be %s first";
     private final ProductOrderRepository repository;
 
     @Autowired
@@ -134,7 +139,34 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     @Override
     public void updateStatus(ProductOrderRecordIn productOrderRecordIn) {
         ProductOrder productorder = this.getProductOrderById(productOrderRecordIn.id());
-        productorder.setStatus(productOrderRecordIn.status());
-        repository.save(productorder);
+
+        if(this.checkStatus(productorder, productOrderRecordIn)) {
+            productorder.setStatus(productOrderRecordIn.status());
+            repository.save(productorder);
+        }
+    }
+
+    private boolean checkStatus(ProductOrder productorder, ProductOrderRecordIn productOrderRecordIn) {
+        StatusProductOrderEnum asIsStatus = valueOf(productorder.getStatus());
+        StatusProductOrderEnum toBeStatus = valueOf(productOrderRecordIn.status());
+
+        if(COMPLETED.equals(asIsStatus) && !COMPLETED.equals(toBeStatus))
+            throw new InvalidProductOrderStatusException(String.format(PRODUCT_ORDER_HAS_ALREADY_BEEN, asIsStatus.name()));
+
+        if(toBeStatus.getValue() > asIsStatus.getValue()) {
+            if (toBeStatus.getValue() - asIsStatus.getValue() > APPROVED.getValue()) {
+                throw new InvalidProductOrderStatusException(String.format(PRODUCT_ORDER_STATUS_MUST_BE_FIRST, APPROVED.name()));
+            } else if(asIsStatus.getValue() == REJECTED.getValue()) {
+                throw new InvalidProductOrderStatusException(String.format(PRODUCT_ORDER_STATUS_MUST_BE_FIRST, DRAFT.name()));
+            }
+            return true;
+        } else if (asIsStatus.getValue() == REJECTED.getValue())
+            return true;
+        else if (asIsStatus.getValue() > REJECTED.getValue()
+                && toBeStatus.getValue() < asIsStatus.getValue()) {
+            throw new InvalidProductOrderStatusException(String.format(PRODUCT_ORDER_HAS_ALREADY_BEEN, asIsStatus.name()));
+        }
+
+        return false;
     }
 }

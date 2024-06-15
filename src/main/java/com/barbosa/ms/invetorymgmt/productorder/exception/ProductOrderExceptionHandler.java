@@ -53,7 +53,7 @@ public class ProductOrderExceptionHandler {
         public ResponseEntity<StandardError> objectNotFound( ObjectNotFoundException e, HttpServletRequest request) { 
             StandardError err = StandardError.builder()
                 .status(HttpStatus.NOT_FOUND.value())
-                .error("Resource is: " + HttpStatus.NOT_FOUND.getReasonPhrase())
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
                 .messege(e.getMessage())
                 .path(request.getRequestURI())
                 .build();		
@@ -64,18 +64,18 @@ public class ProductOrderExceptionHandler {
         public ResponseEntity<StandardError> illegalArgumentException( IllegalArgumentException e, HttpServletRequest request) {
             StandardError err = StandardError.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error("Resource returned: " + HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
                 .messege(e.getMessage())
                 .path(request.getRequestURI())
                 .build();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
         }
 
-        @ExceptionHandler( ProductOrderAlreadyCompletedException.class )
-        public ResponseEntity<StandardError> productOrderAlreadyCompletedException( ProductOrderAlreadyCompletedException e, HttpServletRequest request) {
+        @ExceptionHandler( InvalidProductOrderStatusException.class )
+        public ResponseEntity<StandardError> productOrderAlreadyCompletedException(InvalidProductOrderStatusException e, HttpServletRequest request) {
             StandardError err = StandardError.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Resource returned: " + HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .messege(e.getMessage())
                 .path(request.getRequestURI())
                 .build();

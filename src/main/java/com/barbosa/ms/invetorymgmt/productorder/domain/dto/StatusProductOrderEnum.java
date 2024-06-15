@@ -2,20 +2,24 @@ package com.barbosa.ms.invetorymgmt.productorder.domain.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@NoArgsConstructor
+@RequiredArgsConstructor
 public enum StatusProductOrderEnum {
-    DRAFT,
-    APPROVED,
-    REJECTED,
-    COMPLETED;
+    DRAFT(0),
+    REJECTED(1),
+    APPROVED(2),
+    COMPLETED(3);
 
-    public static StatusProductOrderEnum getByName(String name) {
+    private final int value;
+
+    public static StatusProductOrderEnum ofName(String name) {
         for(StatusProductOrderEnum value : values()) {
             if(value.name().equalsIgnoreCase(name))
                 return value;
         }
-        return null;
+        throw new IllegalArgumentException("Not exists enum item with name: " + name);
     }
 }
