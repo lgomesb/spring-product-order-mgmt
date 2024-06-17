@@ -58,14 +58,7 @@ public class ProductOrderController {
     @GetMapping("{id}")
     public ResponseEntity<ProductOrderResponseDTO> findById(@PathVariable("id") String id) {
         ProductOrderRecordIn productorderRecordIn = service.findById(UUID.fromString(id));
-        return ResponseEntity.ok().body(ProductOrderResponseDTO.builder()
-                .id(productorderRecordIn.id())
-                .description(productorderRecordIn.description())
-                .items(productorderRecordIn.items()
-                        .stream()
-                        .map(i -> new OrderItemDTO(i.productId(), i.quantity()))
-                        .toList())
-                .build());
+        return ResponseEntity.ok().body(ProductOrderResponseDTO.create(productorderRecordIn));
     }
 
     @Operation(summary = "Update ProductOrder by Id", description = "Update ProductOrder by id", tags = { "ProductOrder" })
