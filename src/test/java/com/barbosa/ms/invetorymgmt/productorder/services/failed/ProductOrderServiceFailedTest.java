@@ -19,7 +19,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.barbosa.ms.invetorymgmt.productorder.domain.entities.ProductOrder;
-import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
+import com.barbosa.ms.invetorymgmt.productorder.domain.records.ProductOrderRecord;
 import com.barbosa.ms.invetorymgmt.productorder.repositories.ProductOrderRepository;
 import com.barbosa.ms.invetorymgmt.productorder.services.impl.ProductOrderServiceImpl;
 
@@ -33,7 +33,7 @@ class ProductOrderServiceFailedTest {
     private ProductOrderRepository repository;
     
     private ProductOrder productorder;
-    private ProductOrderRecordIn productorderRecordIn;
+    private ProductOrderRecord productorderRecord;
     private Given given = new Given();
     private When when = new When();
     private Then then = new Then();
@@ -97,7 +97,7 @@ class ProductOrderServiceFailedTest {
         }
 
         void productorderRecordInicietedForFailueReturn () {
-            productorderRecordIn = ProductOrderRecordIn
+            productorderRecord = ProductOrderRecord
                     .builder()
                     .id(productorder.getId())
                     .description(null)
@@ -108,16 +108,16 @@ class ProductOrderServiceFailedTest {
 
     class When {
         
-        public ProductOrderRecordIn callCreateInProductOrderSerivce() {
-            return service.create(productorderRecordIn);
+        public ProductOrderRecord callCreateInProductOrderSerivce() {
+            return service.create(productorderRecord);
         }
         
-        public ProductOrderRecordIn callProductOrderServiceFindById() {
+        public ProductOrderRecord callProductOrderServiceFindById() {
             return service.findById(given.creationIdOfProductOrder());
         }
 
         void callProductOrderSerivceUpdate() {
-            service.update(productorderRecordIn);
+            service.update(productorderRecord);
         }
 
         void callDelteInProductOrderSerivce() {

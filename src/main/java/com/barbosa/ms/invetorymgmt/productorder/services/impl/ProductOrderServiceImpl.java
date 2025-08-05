@@ -4,12 +4,14 @@ import com.barbosa.ms.invetorymgmt.productorder.domain.dto.StatusProductOrderEnu
 import com.barbosa.ms.invetorymgmt.productorder.domain.entities.OrderItem;
 import com.barbosa.ms.invetorymgmt.productorder.domain.entities.ProductOrder;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.OrderItemRecord;
-import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
+import com.barbosa.ms.invetorymgmt.productorder.domain.records.ProductOrderRecord;
 import com.barbosa.ms.invetorymgmt.productorder.exception.InvalidProductOrderStatusException;
 import com.barbosa.ms.invetorymgmt.productorder.repositories.ProductOrderRepository;
 import com.barbosa.ms.invetorymgmt.productorder.services.ProductOrderService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -30,7 +32,7 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     }
 
     @Override
-    public ProductOrderRecordIn create(ProductOrderRecordIn recordObject) {
+    public ProductOrderRecord create(ProductOrderRecord recordObject) {
 
         ProductOrder productOrder = ProductOrder
                 .builder()
@@ -47,7 +49,7 @@ public class ProductOrderServiceImpl implements ProductOrderService {
         productOrder.setItems(items);
         productOrder = repository.save(productOrder);
 
-        return ProductOrderRecordIn
+        return ProductOrderRecord
                 .builder()
                 .status(productOrder.getStatus())
                 .description(productOrder.getDescription())
@@ -60,9 +62,9 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     }
 
     @Override
-    public ProductOrderRecordIn findById(UUID id) {
+    public ProductOrderRecord findById(UUID id) {
         ProductOrder productOrder = this.getProductOrderById(id);
-        return ProductOrderRecordIn
+        return ProductOrderRecord
                 .builder()
                 .description(productOrder.getDescription())
                 .status(productOrder.getStatus())
@@ -75,7 +77,7 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     }
 
     @Override
-    public void update(ProductOrderRecordIn recordObject) {
+    public void update(ProductOrderRecord recordObject) {
         ProductOrder productOrder = this.getProductOrderById(recordObject.id());
         productOrder.setDescription(recordObject.description());
 
@@ -120,35 +122,33 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     }
 
     @Override
-    public List<ProductOrderRecordIn> listAll() {
+    public List<ProductOrderRecord> listAll() {
         return repository.findAll()
             .stream()
-            .map(entity -> ProductOrderRecordIn.builder()
-                    .id(entity.getId())
-                    .status(entity.getStatus())
-                    .description(entity.getDescription())
-                    .items(entity.getItems()
-                            .stream()
-                            .map(i -> new OrderItemRecord(i.getProductId(), i.getQuantity()))
-                                .collect(Collectors.toSet()))
-                    .build())
+            .map(ProductOrderRecord::from)
             .toList();
     }
 
 
     @Override
-    public void updateStatus(ProductOrderRecordIn productOrderRecordIn) {
-        ProductOrder productorder = this.getProductOrderById(productOrderRecordIn.id());
+    public void updateStatus(ProductOrderRecord productOrderRecord) {
+        ProductOrder productorder = this.getProductOrderById(productOrderRecord.id());
 
-        if(this.checkStatus(productorder, productOrderRecordIn)) {
-            productorder.setStatus(productOrderRecordIn.status());
+        if(this.checkStatus(productorder, productOrderRecord)) {
+            productorder.setStatus(productOrderRecord.status());
             repository.save(productorder);
         }
     }
 
-    private boolean checkStatus(ProductOrder productorder, ProductOrderRecordIn productOrderRecordIn) {
+    @Override
+    public Page<ProductOrderRecord> search(String name, PageRequest pageRequest) {
+        Page<ProductOrder> productOrders = repository.findDistinctByDescriptionContaining(name, pageRequest);
+        return productOrders.map(ProductOrderRecord::from);
+    }
+
+    private boolean checkStatus(ProductOrder productorder, ProductOrderRecord productOrderRecord) {
         StatusProductOrderEnum asIsStatus = valueOf(productorder.getStatus());
-        StatusProductOrderEnum toBeStatus = valueOf(productOrderRecordIn.status());
+        StatusProductOrderEnum toBeStatus = valueOf(productOrderRecord.status());
 
         if(COMPLETED.equals(asIsStatus) && !COMPLETED.equals(toBeStatus))
             throw new InvalidProductOrderStatusException(String.format(PRODUCT_ORDER_HAS_ALREADY_BEEN, asIsStatus.name()));

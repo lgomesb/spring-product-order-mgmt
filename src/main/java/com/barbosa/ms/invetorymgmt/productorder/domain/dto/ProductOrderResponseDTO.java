@@ -1,7 +1,10 @@
 package com.barbosa.ms.invetorymgmt.productorder.domain.dto;
 
-import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
-import lombok.*;
+import com.barbosa.ms.invetorymgmt.productorder.domain.records.ProductOrderRecord;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,12 +19,12 @@ public class ProductOrderResponseDTO extends ResponseDTO {
 
     private StatusProductOrderEnum status;
 
-    public static ProductOrderResponseDTO create(ProductOrderRecordIn productorderRecordIn) {
+    public static ProductOrderResponseDTO create(ProductOrderRecord productorderRecord) {
         return ProductOrderResponseDTO.builder()
-                .id(productorderRecordIn.id())
-                .description(productorderRecordIn.description())
-                .status(StatusProductOrderEnum.valueOf(productorderRecordIn.status()))
-                .items(productorderRecordIn.items().stream().map(OrderItemDTO::create).toList())
+                .id(productorderRecord.id())
+                .description(productorderRecord.description())
+                .status(StatusProductOrderEnum.valueOf(productorderRecord.status()))
+                .items(productorderRecord.items().stream().map(OrderItemDTO::create).toList())
                 .build();
     }
 

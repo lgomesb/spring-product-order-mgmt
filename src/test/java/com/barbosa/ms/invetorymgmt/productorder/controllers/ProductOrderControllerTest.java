@@ -7,7 +7,7 @@ import com.barbosa.ms.invetorymgmt.productorder.domain.dto.ProductOrderRequestDT
 import com.barbosa.ms.invetorymgmt.productorder.domain.dto.ProductOrderResponseDTO;
 import com.barbosa.ms.invetorymgmt.productorder.domain.dto.StatusProductOrderEnum;
 import com.barbosa.ms.invetorymgmt.productorder.domain.records.OrderItemRecord;
-import com.barbosa.ms.invetorymgmt.productorder.domain.records.in.ProductOrderRecordIn;
+import com.barbosa.ms.invetorymgmt.productorder.domain.records.ProductOrderRecord;
 import com.barbosa.ms.invetorymgmt.productorder.services.ProductOrderService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,13 +23,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,7 +56,7 @@ class ProductOrderControllerTest {
     @InjectMocks
     private ProductOrderController controller;
 
-    private ProductOrderRecordIn productorderRecordIn;
+    private ProductOrderRecord productorderRecord;
 
     private final Given given = new Given();
     private final When when = new When();
@@ -66,7 +65,7 @@ class ProductOrderControllerTest {
 
     @BeforeEach
     void setup() {
-        productorderRecordIn = ProductOrderRecordIn.builder()
+        productorderRecord = ProductOrderRecord.builder()
                 .id(PRODUCT_ORDER_UUID)
                 .status(StatusProductOrderEnum.DRAFT.name())
                 .description("test-01")
@@ -85,9 +84,9 @@ class ProductOrderControllerTest {
 
     @Test
     void shouldSucceededWhenCallFindById() {
-        given.productOrderSearched();
+        given.productOrderFound();
         Response response = when.findProductOrder();
-        then.productOrderSearchedResponseIsValid(response);
+        then.productOrderFoundResponseIsValid(response);
     }
 
     @Test
@@ -99,7 +98,7 @@ class ProductOrderControllerTest {
 
     @Test
     void shouldSucceededWhenCallDelete() {
-        Response response = when.deleteProductOrtder();
+        Response response = when.deleteProductOrder();
         then.productOrderDeletedResponseIsValid(response);
     }
 
@@ -110,12 +109,19 @@ class ProductOrderControllerTest {
         then.productOrderFindAllResponseIsValid(response);
     }
 
+    @Test
+    @DisplayName("List pageable Product Orders")
+    void shouldSucceededWhenCallSearch() {
+        given.productOrderSearched();
+        Response response = when.searchProductOrder();
+        then.productOrderSearchedResponseIsValid(response);
+    }
 
     private class Given {
         public void productOrderCreationService() {
-            doReturn(productorderRecordIn)
+            doReturn(productorderRecord)
                     .when(service)
-                        .create(any(ProductOrderRecordIn.class));
+                        .create(any(ProductOrderRecord.class));
         }
 
         public String productOrderRequestJSON() throws JsonProcessingException {
@@ -127,8 +133,8 @@ class ProductOrderControllerTest {
             return new ObjectMapper().writeValueAsString(request);
         }
 
-        public void productOrderSearched() {
-            doReturn(productorderRecordIn)
+        public void productOrderFound() {
+            doReturn(productorderRecord)
                     .when(service)
                             .findById(any(UUID.class));
         }
@@ -143,7 +149,7 @@ class ProductOrderControllerTest {
         }
 
         public void productOrderListed() {
-            List<ProductOrderRecordIn> retVal = Collections.singletonList(new ProductOrderRecordIn(
+            List<ProductOrderRecord> retVal = Collections.singletonList(new ProductOrderRecord(
                     PRODUCT_ORDER_UUID,
                     "product_order_test",
                     StatusProductOrderEnum.DRAFT.name(),
@@ -152,6 +158,20 @@ class ProductOrderControllerTest {
             doReturn(retVal)
                     .when(service)
                             .listAll();
+        }
+
+        public void productOrderSearched() {
+            OrderItemRecord item = new OrderItemRecord(UUID.randomUUID(), 3);
+            Set<OrderItemRecord> items = Collections.singleton(item);
+            ProductOrderRecord productOrderRecord = ProductOrderRecord.builder()
+                    .id(UUID.randomUUID())
+                    .description("Test-Product-Order")
+                    .status(StatusProductOrderEnum.DRAFT.name())
+                    .items(items)
+                    .build();
+
+            when(service.search(anyString(), any(PageRequest.class)))
+                    .thenReturn(new PageImpl<>(Collections.singletonList(productOrderRecord)));
         }
     }
 
@@ -197,7 +217,7 @@ class ProductOrderControllerTest {
                     .put(STATIC_URI + "{id}");
         }
 
-        public Response deleteProductOrtder() {
+        public Response deleteProductOrder() {
             return given()
                     .port(port)
                     .contentType(ContentType.JSON)
@@ -208,6 +228,15 @@ class ProductOrderControllerTest {
         }
 
         public Response findAllProductOrder() {
+            return given()
+                    .port(port)
+                    .contentType(ContentType.JSON)
+                    .log().all()
+                    .when()
+                    .get(STATIC_URI + "all");
+        }
+
+        public Response searchProductOrder() {
             return given()
                     .port(port)
                     .contentType(ContentType.JSON)
@@ -227,7 +256,7 @@ class ProductOrderControllerTest {
 
         }
 
-        public void productOrderSearchedResponseIsValid(Response response) {
+        public void productOrderFoundResponseIsValid(Response response) {
             assertNotNull(response);
             assertNotNull(response.getBody().jsonPath().getString("id"));
         }
@@ -246,6 +275,17 @@ class ProductOrderControllerTest {
             assertNotNull(response);
             assertEquals(response.getStatusCode(), HttpStatus.OK.value());
             assertInstanceOf(ArrayList.class, response.getBody().jsonPath().get());
+        }
+
+        public void productOrderSearchedResponseIsValid(Response response) {
+            assertNotNull(response);
+            assertEquals(response.getStatusCode(), HttpStatus.PARTIAL_CONTENT.value());
+            assertEquals("1", response.getBody().jsonPath().getString("totalPages"));
+            assertEquals("1", response.getBody().jsonPath().getString("totalElements"));
+            assertInstanceOf(ArrayList.class, response.getBody().jsonPath().get("content"));
+            assertEquals("Test-Product-Order", response.getBody().jsonPath().getString("content[0].description"));
+            assertInstanceOf(ArrayList.class, response.getBody().jsonPath().get("content[0].items"));
+            assertEquals("3", response.getBody().jsonPath().getString("content[0].items[0].quantity"));
         }
 
         private static void checkProductId(Response response) {
