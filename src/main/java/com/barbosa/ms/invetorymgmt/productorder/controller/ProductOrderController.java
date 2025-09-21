@@ -23,10 +23,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Tag(name = "ProductOrder", description = "Endpoints for ProductOrder operations")
-@RestController
-@RequestMapping("/")
+
 @CrossOrigin("http://localhost:4200")
+@Tag(name = "ProductOrder", description = "Endpoints for ProductOrder operations")
+@RequestMapping("/")
+@RestController
 public class ProductOrderController {
 
     private final ProductOrderService service;
@@ -35,7 +36,7 @@ public class ProductOrderController {
         this.service = service;
     }
 
-    @Operation(summary = "Create ProductOrder", description = "Create a new ProductOrder", tags = { "ProductOrder" })
+    @Operation(summary = "Create ProductOrder", description = "Create a new ProductOrder", tags = {"ProductOrder"})
     @PostMapping
     public ResponseEntity<ProductOrderResponseDTO> create(@RequestBody @Valid ProductOrderRequestDTO dto) {
 
@@ -98,10 +99,10 @@ public class ProductOrderController {
     @Operation(summary = "ProductOrder list pageable", description = "List ProductOrder in the database", tags = {"ProductOrder"})
     @GetMapping()
     public ResponseEntity<Page<ProductOrderResponseDTO>> search(
-            @RequestParam(value = "name", defaultValue = "") String name,
+            @RequestParam(value = "description", defaultValue = "") String description,
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "linesPerPage", defaultValue = "5") Integer linesPerPage,
-            @RequestParam(value = "orderBy", defaultValue = "name") String orderBy,
+            @RequestParam(value = "orderBy", defaultValue = "description") String orderBy,
             @RequestParam(value = "direction", defaultValue = "ASC") String direction) {
 
         PageRequest pageRequest = PageRequest.of(page,
@@ -109,17 +110,17 @@ public class ProductOrderController {
                 Sort.Direction.valueOf(direction.toUpperCase()),
                 orderBy);
 
-        Page<ProductOrderRecord> records = service.search(decodeParam(name), pageRequest);
+        Page<ProductOrderRecord> records = service.search(decodeParam(description), pageRequest);
         Page<ProductOrderResponseDTO> orders = records.map(ProductOrderResponseDTO::create);
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).body(orders);
     }
 
-    private String decodeParam(String name) {
-        return URLDecoder.decode(name, StandardCharsets.UTF_8);
+    private String decodeParam(String description) {
+        return URLDecoder.decode(description, StandardCharsets.UTF_8);
     }
 
     @Operation(summary = "List all ProductOrder", description = "List all ProductOrder in the database", tags = {"ProductOrder"})
-    @GetMapping("/all")
+    @GetMapping("all")
     public ResponseEntity<List<ProductOrderResponseDTO>> listAll() {
         List<ProductOrderResponseDTO> objects = service.listAll()
                 .stream()
